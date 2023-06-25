@@ -1,0 +1,8 @@
+server:
+    error:
+        include-message: always
+spring:
+    data:
+        mongodb:
+            uri: ${MONGO_DB_CONNECTION:mongodb://mongo:password@localhost:27017/speechpal}
+            database: ${MONGO_DB_DATABASE:speechpal}
