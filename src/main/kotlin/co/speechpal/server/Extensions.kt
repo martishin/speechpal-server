@@ -8,6 +8,7 @@ import co.speechpal.server.models.dto.SentenceResponse
 fun Report.toResponse() =
     ReportResponse(
         report = this.report.map { it.toResponse() },
+        hasErrors = this.hasErrors,
     )
 
 fun Sentence.toResponse() =
