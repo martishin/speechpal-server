@@ -43,8 +43,6 @@ class VoiceHandler(
     ): Either<BotError, BotResponse> {
         val context = Context(media.fileUniqueId)
 
-        log.info("[${context.requestId}] Started processing request")
-
         return telegramFileService.downloadFileById(context, bot, media.fileId).flatMap {
             val (fileUniqueId, file) = it
 
@@ -60,6 +58,11 @@ class VoiceHandler(
                 audioTranscriberService.transcribe(context, audioFile).flatMap { text ->
                     grammarCheckerService.checkGrammar(context, text).flatMap { textCheckResult ->
                         reportsService.insertReport(context.requestId, textCheckResult)
+
+                        Files.walk(dirPath)
+                            .sorted(Comparator.reverseOrder()) // This is important, so we delete child files/directories first
+                            .forEach(Files::delete)
+
                         return BotResponse(
                             "You can check your results here: \n" +
                                 "https://speechpal.co/reports/${context.requestId}",
