@@ -6,5 +6,9 @@ RUN gradle build --no-daemon
 
 # Stage 2: Run
 FROM openjdk:17-jdk
+
+# Install ffmpeg
+RUN apt-get install ffmpeg -y
+
 COPY --from=build /home/gradle/src/build/libs/server.jar /app/server.jar
 ENTRYPOINT ["java","-jar","/app/server.jar"]

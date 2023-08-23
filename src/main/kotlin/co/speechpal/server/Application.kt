@@ -1,11 +1,10 @@
 package co.speechpal.server
 
-import org.springframework.boot.autoconfigure.SpringBootApplication
+import co.speechpal.server.bot.BotServer
 import org.springframework.boot.runApplication
 
-@SpringBootApplication
-class Application
-
 fun main(args: Array<String>) {
-	runApplication<Application>(*args)
+    val context = runApplication<ApplicationServer>(*args)
+    val botServer = context.getBean(BotServer::class.java)
+    botServer.startBot()
 }
