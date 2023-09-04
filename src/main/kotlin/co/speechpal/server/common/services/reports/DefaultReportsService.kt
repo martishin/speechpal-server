@@ -1,8 +1,8 @@
-package co.speechpal.server.common.services
+package co.speechpal.server.common.services.reports
 
-import co.speechpal.server.common.models.domain.TextCheckResult
-import co.speechpal.server.common.models.repository.Report
-import co.speechpal.server.common.repositories.ReportsRepository
+import co.speechpal.server.common.models.domain.reports.TextCheckResult
+import co.speechpal.server.common.models.persistence.Report
+import co.speechpal.server.common.repositories.reports.ReportsRepository
 import co.speechpal.server.common.toReport
 import org.springframework.stereotype.Service
 

@@ -8,6 +8,8 @@ import co.speechpal.server.bot.handlers.commands.base.AbstractCommandHandler
 import co.speechpal.server.bot.handlers.media.base.AbstractMediaHandler
 import co.speechpal.server.bot.models.dto.BotError
 import co.speechpal.server.bot.models.dto.BotResponse
+import co.speechpal.server.common.models.domain.users.User
+import co.speechpal.server.common.services.users.UsersService
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.command
@@ -27,6 +29,7 @@ import java.util.concurrent.Executors
 @Component
 class BotServer(
     private val botProperties: BotProperties,
+    private val usersService: UsersService,
     @Autowired private val commandHandlers: Map<String, AbstractCommandHandler>,
     @Autowired private val mediaHandlers: Map<String, AbstractMediaHandler<*>>,
 ) {
@@ -67,6 +70,17 @@ class BotServer(
     }
 
     private suspend fun handleCommand(command: String, env: CommandHandlerEnvironment): Either<BotError, BotResponse> {
+        if (usersService.findByTelegramUserId(env.message.from!!.id) == null) {
+            usersService.save(
+                User(
+                    telegramUserId = env.message.from!!.id,
+                    chatId = env.message.chat.id,
+                    username = env.message.from!!.username,
+                    firstName = env.message.from!!.firstName,
+                    lastName = env.message.from!!.lastName,
+                ),
+            )
+        }
         return commandHandlers[command]?.handle(env) ?: run {
             val error = "No handler found for the command '$command'"
             log.error(error)

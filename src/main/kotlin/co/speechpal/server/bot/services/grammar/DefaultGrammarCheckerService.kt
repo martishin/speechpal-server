@@ -5,7 +5,7 @@ import arrow.core.right
 import co.speechpal.server.bot.gateways.openai.OpenAIGateway
 import co.speechpal.server.bot.models.domain.Context
 import co.speechpal.server.bot.models.dto.BotError
-import co.speechpal.server.common.models.domain.TextCheckResult
+import co.speechpal.server.common.models.domain.reports.TextCheckResult
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope

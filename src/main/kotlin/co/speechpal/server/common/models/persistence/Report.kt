@@ -1,6 +1,6 @@
-package co.speechpal.server.common.models.repository
+package co.speechpal.server.common.models.persistence
 
-import co.speechpal.server.common.models.domain.SentenceCheckResult
+import co.speechpal.server.common.models.domain.reports.SentenceCheckResult
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field

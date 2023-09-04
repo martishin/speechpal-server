@@ -2,8 +2,8 @@ package co.speechpal.server.api
 
 import co.speechpal.server.api.models.dto.ReportResponse
 import co.speechpal.server.api.models.dto.SentenceCheckResponse
-import co.speechpal.server.common.models.domain.SentenceCheckResult
-import co.speechpal.server.common.models.repository.Report
+import co.speechpal.server.common.models.domain.reports.SentenceCheckResult
+import co.speechpal.server.common.models.persistence.Report
 
 fun Report.toResponse() =
     ReportResponse(

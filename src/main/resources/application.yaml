@@ -2,6 +2,14 @@ server:
     error:
         include-message: always
 spring:
+    r2dbc:
+        url: r2dbc:${POSTGRESQL_DB_CONNECTION}
+        username: ${POSTGRESQL_DB_USERNAME}
+        password: ${POSTGRESQL_DB_PASSWORD}
+    flyway:
+        url: jdbc:${POSTGRESQL_DB_CONNECTION}
+        user: ${POSTGRESQL_DB_USERNAME}
+        password: ${POSTGRESQL_DB_PASSWORD}
     data:
         mongodb:
             uri: ${MONGO_DB_CONNECTION}

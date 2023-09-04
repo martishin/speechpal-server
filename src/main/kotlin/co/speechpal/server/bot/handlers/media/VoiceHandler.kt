@@ -12,7 +12,7 @@ import co.speechpal.server.bot.services.audio.AudioConverterService
 import co.speechpal.server.bot.services.audio.AudioTranscriberService
 import co.speechpal.server.bot.services.grammar.GrammarCheckerService
 import co.speechpal.server.bot.services.telegram.TelegramFileService
-import co.speechpal.server.common.services.ReportsService
+import co.speechpal.server.common.services.reports.ReportsService
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.Message
 import com.github.kotlintelegrambot.entities.Update
