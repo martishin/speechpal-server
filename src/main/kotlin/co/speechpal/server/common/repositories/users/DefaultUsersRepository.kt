@@ -1,47 +1,102 @@
 package co.speechpal.server.common.repositories.users
 
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
+import co.speechpal.server.common.errorhandling.ExceptionHandler
+import co.speechpal.server.common.models.domain.users.NewUser
 import co.speechpal.server.common.models.domain.users.User
-import co.speechpal.server.common.toUser
+import co.speechpal.server.common.models.errors.DomainError
 import co.speechpal.server.jooq.speechpal.Tables.USERS
+import co.speechpal.server.jooq.speechpal.tables.records.UsersRecord
 import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.jooq.DSLContext
 import org.springframework.stereotype.Repository
-import reactor.core.publisher.Mono
+import java.time.Instant
 
 @Repository
-class DefaultUsersRepository(private val dslContext: DSLContext) : UsersRepository {
-    override suspend fun findByTelegramUserId(telegramUserId: Long): User? {
-        val sql = dslContext.selectFrom(USERS)
-            .where(USERS.TELEGRAM_USER_ID.eq(telegramUserId))
+class DefaultUsersRepository(
+    private val dslContext: DSLContext,
+    private val exceptionHandler: ExceptionHandler,
+) : UsersRepository {
+    override suspend fun findByTelegramUserId(telegramUserId: Long): Either<DomainError, User?> {
+        return try {
+            val sql = dslContext.selectFrom(USERS)
+                .where(USERS.TELEGRAM_USER_ID.eq(telegramUserId))
 
-        return Mono.from(sql)
-            .map { it.toUser() }
-            .awaitSingleOrNull()
+            val foundRecord = sql
+                .awaitFirstOrNull()
+
+            foundRecord?.toUser().right()
+        } catch (e: Exception) {
+            exceptionHandler
+                .handleDbException(e, "Error when fetching user from db")
+                .left()
+        }
     }
 
-    override suspend fun save(user: User): User {
-        val sql = dslContext
-            .insertInto(USERS)
-            .columns(
-                USERS.TELEGRAM_USER_ID,
-                USERS.CHAT_ID,
-                USERS.USERNAME,
-                USERS.FIRST_NAME,
-                USERS.LAST_NAME,
-                USERS.CURRENT_DIALOG_ID,
-            )
-            .values(
-                user.telegramUserId,
-                user.chatId,
-                user.username,
-                user.firstName,
-                user.lastName,
-                user.currentDialogId,
-            )
+    override suspend fun create(newUser: NewUser): Either<DomainError, User> {
+        return try {
+            val sql = dslContext
+                .insertInto(USERS)
+                .columns(
+                    USERS.TELEGRAM_USER_ID,
+                    USERS.CHAT_ID,
+                    USERS.USERNAME,
+                    USERS.FIRST_NAME,
+                    USERS.LAST_NAME,
+                )
+                .values(
+                    newUser.telegramUserId,
+                    newUser.chatId,
+                    newUser.username,
+                    newUser.firstName,
+                    newUser.lastName,
+                )
 
-        val userRecord = sql.returning().awaitFirst()
+            val createdRecord = sql
+                .returning()
+                .awaitFirst()
 
-        return userRecord.toUser()
+            createdRecord.toUser().right()
+        } catch (e: Exception) {
+            exceptionHandler
+                .handleDbException(e, "Error when creating user in db")
+                .left()
+        }
+    }
+
+    override suspend fun save(user: User): Either<DomainError, User> {
+        return try {
+            val sql = dslContext
+                .update(USERS)
+                .set(USERS.CURRENT_DIALOG_ID, user.currentDialogId)
+                .where(USERS.ID.eq(user.id))
+
+            val updatedRecord = sql
+                .returning()
+                .awaitFirst()
+
+            updatedRecord.toUser().right()
+        } catch (e: Exception) {
+            exceptionHandler
+                .handleDbException(e, "Error when saving user in db")
+                .left()
+        }
+    }
+
+    private fun UsersRecord.toUser(): User {
+        return User(
+            this.get("id", Int::class.java),
+            this.get("telegram_user_id", Long::class.java),
+            this.get("chat_id", Long::class.java),
+            this.get("username", String::class.java),
+            this.get("first_name", String::class.java),
+            this.get("last_name", String::class.java),
+            this.get("created_at", Instant::class.java),
+            this.get("updated_at", Instant::class.java),
+            this.get("current_dialog_id", Int::class.java),
+        )
     }
 }

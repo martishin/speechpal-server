@@ -68,4 +68,40 @@ class DefaultOpenAIGateway(
             edit = edit,
         )
     }
+
+    override suspend fun getChatCompletion(dialog: List<String>): String {
+        val messages = dialog.mapIndexed { index, message ->
+            if (index % 2 == 0) {
+                ChatMessage(
+                    role = ChatRole.User,
+                    content = message,
+                )
+            } else {
+                ChatMessage(
+                    role = ChatRole.Assistant,
+                    content = message,
+                )
+            }
+        }
+
+        val systemMessage = ChatMessage(
+            role = ChatRole.System,
+            content = """    
+                As an advanced chatbot, your primary goal is to engage users in meaningful discussions on a variety of topics while helping them improve their English language skills. When conversing, be attentive to the user's language use, and offer gentle corrections and suggestions for improvement where necessary. Additionally, you are equipped to provide detailed explanations and examples to support your statements and help users comprehend complex subjects better.
+
+                Whenever a user asks a question or initiates a discussion, ensure to respond in a manner that fosters learning and improvement. Incorporate advanced vocabulary, correct grammatical structures, and clear articulation in your responses to set a good example. Moreover, be open to discussing various topics from science, technology, arts to everyday matters.
+
+                Your ultimate goal is to assist users effectively while providing a supportive environment for English language improvement.
+            """.trimIndent().trim(),
+        )
+
+        val request = ChatCompletionRequest(
+            model = ModelId("gpt-3.5-turbo"),
+            messages = listOf(systemMessage) + messages,
+        )
+
+        val completion = openAIClient.chatCompletion(request)
+
+        return completion.choices[0].message!!.content!!
+    }
 }

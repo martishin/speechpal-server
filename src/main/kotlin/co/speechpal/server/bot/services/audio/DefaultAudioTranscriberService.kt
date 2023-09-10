@@ -4,7 +4,7 @@ import arrow.core.Either
 import arrow.core.right
 import co.speechpal.server.bot.gateways.openai.OpenAIGateway
 import co.speechpal.server.bot.models.domain.Context
-import co.speechpal.server.bot.models.dto.BotError
+import co.speechpal.server.bot.models.errors.BotError
 import com.aallam.openai.api.BetaOpenAI
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

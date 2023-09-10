@@ -9,4 +9,5 @@ import java.io.File
 interface OpenAIGateway {
     suspend fun transcribe(audioFile: File): Transcription
     suspend fun checkGrammar(sentence: String): SentenceCheckResult
+    suspend fun getChatCompletion(dialog: List<String>): String
 }

@@ -5,20 +5,15 @@ import arrow.core.left
 import arrow.core.right
 import co.speechpal.server.bot.models.domain.Context
 import co.speechpal.server.bot.models.domain.TelegramFile
-import co.speechpal.server.bot.models.dto.BotError
+import co.speechpal.server.bot.models.errors.BotError
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.files.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class DefaultTelegramFileService : TelegramFileService {
-    companion object {
-        private val log = LoggerFactory.getLogger(DefaultTelegramFileService::class.java)
-    }
-
     override suspend fun downloadFileById(context: Context, bot: Bot, fileId: String): Either<BotError, TelegramFile> {
         val fileInfo = fetchFileInfo(bot, fileId)
             ?: return BotError.ErrorProcessingFile("Error getting file info").left()

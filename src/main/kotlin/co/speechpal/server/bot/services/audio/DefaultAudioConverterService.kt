@@ -4,7 +4,7 @@ import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
 import co.speechpal.server.bot.models.domain.Context
-import co.speechpal.server.bot.models.dto.BotError
+import co.speechpal.server.bot.models.errors.BotError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory

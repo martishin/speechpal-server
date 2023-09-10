@@ -2,17 +2,20 @@ package co.speechpal.server.bot.handlers.commands
 
 import arrow.core.Either
 import arrow.core.right
+import co.speechpal.server.bot.errorhandling.ErrorHandler
 import co.speechpal.server.bot.handlers.Operation
 import co.speechpal.server.bot.handlers.commands.base.AbstractCommandHandler
-import co.speechpal.server.bot.models.dto.BotError
 import co.speechpal.server.bot.models.dto.BotResponse
+import co.speechpal.server.bot.models.errors.BotError
 import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.entities.Message
 import com.github.kotlintelegrambot.entities.Update
 import org.springframework.stereotype.Component
 
 @Component(Operation.START)
-class StartHandler : AbstractCommandHandler() {
+class StartHandler(
+    errorHandler: ErrorHandler,
+) : AbstractCommandHandler(errorHandler) {
     private companion object {
         const val START_TEXT = """
 Enjoy using the SpeechPal Telegram bot to analyze your speech in audio and video formats, and improve your speaking skills with personalized recommendations.

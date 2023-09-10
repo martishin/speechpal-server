@@ -1,6 +1,7 @@
 server:
     error:
         include-message: always
+
 spring:
     r2dbc:
         url: r2dbc:${POSTGRESQL_DB_CONNECTION}
@@ -18,3 +19,6 @@ spring:
 bot:
     token: ${BOT_TOKEN}
     openAIApiKey: ${OPENAI_API_KEY}
+
+common:
+    sqlSchema: speechpal
