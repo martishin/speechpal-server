@@ -7,16 +7,11 @@ import co.speechpal.server.bot.models.domain.Context
 import co.speechpal.server.bot.models.errors.BotError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
 class DefaultAudioConverterService : AudioConverterService {
-    companion object {
-        private val log = LoggerFactory.getLogger(DefaultAudioConverterService::class.java)
-    }
-
     override suspend fun convert(
         context: Context,
         telegramAudioFile: File,

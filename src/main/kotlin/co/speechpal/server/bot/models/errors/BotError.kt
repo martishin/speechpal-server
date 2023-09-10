@@ -12,4 +12,5 @@ sealed class BotError(reason: String) : GenericError(reason) {
     class ErrorProcessingFile(reason: String) : BotError(reason)
     class ErrorConvertingAudioFile(reason: String) : BotError(reason)
     class DomainError(reason: String) : BotError(reason)
+    class OpenAiApiError : BotError("Error when communicating with OpenAI API")
 }

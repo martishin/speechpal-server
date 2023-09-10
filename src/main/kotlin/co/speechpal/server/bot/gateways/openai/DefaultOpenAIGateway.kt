@@ -1,6 +1,10 @@
 package co.speechpal.server.bot.gateways.openai
 
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
 import co.speechpal.server.bot.configuration.BotProperties
+import co.speechpal.server.bot.models.errors.BotError
 import co.speechpal.server.common.models.domain.reports.SentenceCheckResult
 import com.aallam.openai.api.BetaOpenAI
 import com.aallam.openai.api.audio.Transcription
@@ -30,7 +34,7 @@ class DefaultOpenAIGateway(
         ),
     )
 
-    override suspend fun transcribe(audioFile: File): Transcription {
+    override suspend fun transcribe(audioFile: File): Either<BotError, Transcription> {
         val request = TranscriptionRequest(
             audio = FileSource(
                 path = audioFile.toOkioPath(),
@@ -40,10 +44,10 @@ class DefaultOpenAIGateway(
             language = "en",
         )
 
-        return openAIClient.transcription(request)
+        return openAIClient.transcription(request).right()
     }
 
-    override suspend fun checkGrammar(sentence: String): SentenceCheckResult {
+    override suspend fun checkGrammar(sentence: String): Either<BotError, SentenceCheckResult> {
         val request = ChatCompletionRequest(
             model = ModelId("gpt-3.5-turbo"),
             messages = listOf(
@@ -57,19 +61,19 @@ class DefaultOpenAIGateway(
 
         val completion = openAIClient.chatCompletion(request)
 
-        var edit = completion.choices[0].message!!.content
+        var edit = completion.choices[0].message?.content ?: return BotError.OpenAiApiError().left()
 
-        if (edit != null && "Correct." in edit) {
-            edit = null
+        if ("Correct." in edit) {
+            edit = ""
         }
 
         return SentenceCheckResult(
             sentence = sentence,
             edit = edit,
-        )
+        ).right()
     }
 
-    override suspend fun getChatCompletion(dialog: List<String>): String {
+    override suspend fun getChatCompletion(dialog: List<String>): Either<BotError, String> {
         val messages = dialog.mapIndexed { index, message ->
             if (index % 2 == 0) {
                 ChatMessage(
@@ -102,6 +106,8 @@ class DefaultOpenAIGateway(
 
         val completion = openAIClient.chatCompletion(request)
 
-        return completion.choices[0].message!!.content!!
+        val result = completion.choices[0].message?.content ?: return BotError.OpenAiApiError().left()
+
+        return result.right()
     }
 }
