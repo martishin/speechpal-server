@@ -1,8 +1,7 @@
 package co.speechpal.server.bot.services.telegram
 
 import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
+import arrow.core.raise.either
 import co.speechpal.server.bot.models.domain.Context
 import co.speechpal.server.bot.models.domain.TelegramFile
 import co.speechpal.server.bot.models.errors.BotError
@@ -14,16 +13,20 @@ import org.springframework.stereotype.Service
 
 @Service
 class DefaultTelegramFileService : TelegramFileService {
-    override suspend fun downloadFileById(context: Context, bot: Bot, fileId: String): Either<BotError, TelegramFile> {
+    override suspend fun downloadFileById(
+        context: Context,
+        bot: Bot,
+        fileId: String,
+    ): Either<BotError, TelegramFile> = either {
         val fileInfo = fetchFileInfo(bot, fileId)
-            ?: return BotError.ErrorProcessingFile("Error getting file info").left()
+            ?: raise(BotError.ErrorProcessingFile("Error getting file info"))
         val downloadedFile = downloadFile(bot, fileInfo.filePath!!)
-            ?: return BotError.ErrorProcessingFile("Error downloading file").left()
+            ?: raise(BotError.ErrorProcessingFile("Error downloading file"))
 
-        return TelegramFile(
+        TelegramFile(
             fileInfo.fileUniqueId,
             downloadedFile,
-        ).right()
+        )
     }
 
     private suspend fun fetchFileInfo(bot: Bot, fileId: String): File? = withContext(Dispatchers.IO) {

@@ -9,15 +9,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class DefaultUsersService(private val usersRepository: UsersRepository) : UsersService {
-    override suspend fun findByTelegramUserId(telegramUserId: Long): Either<DomainError, User?> {
-        return usersRepository.findByTelegramUserId(telegramUserId)
-    }
+    override suspend fun findByTelegramUserId(telegramUserId: Long): Either<DomainError, User?> =
+        usersRepository.findByTelegramUserId(telegramUserId)
 
-    override suspend fun create(newUser: NewUser): Either<DomainError, User> {
-        return usersRepository.create(newUser)
-    }
+    override suspend fun create(newUser: NewUser): Either<DomainError, User> =
+        usersRepository.create(newUser)
 
-    override suspend fun save(user: User): Either<DomainError, User> {
-        return usersRepository.save(user)
-    }
+    override suspend fun save(user: User): Either<DomainError, User> =
+        usersRepository.save(user)
 }

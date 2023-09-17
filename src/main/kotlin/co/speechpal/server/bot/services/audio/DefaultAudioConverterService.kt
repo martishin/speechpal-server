@@ -1,8 +1,7 @@
 package co.speechpal.server.bot.services.audio
 
 import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
+import arrow.core.raise.either
 import co.speechpal.server.bot.models.domain.Context
 import co.speechpal.server.bot.models.errors.BotError
 import kotlinx.coroutines.Dispatchers
@@ -16,8 +15,8 @@ class DefaultAudioConverterService : AudioConverterService {
         context: Context,
         telegramAudioFile: File,
         audioFile: File,
-    ): Either<BotError, Boolean> {
-        return withContext(Dispatchers.IO) {
+    ): Either<BotError, Boolean> = either {
+        withContext(Dispatchers.IO) {
             val command = listOf(
                 "ffmpeg",
                 "-i",
@@ -29,10 +28,10 @@ class DefaultAudioConverterService : AudioConverterService {
             val processResultCode = process.waitFor()
 
             if (processResultCode != 0) {
-                BotError.ErrorConvertingAudioFile("Error converting file").left()
+                raise(BotError.ErrorConvertingAudioFile("Error converting file"))
             }
 
-            true.right()
+            true
         }
     }
 }

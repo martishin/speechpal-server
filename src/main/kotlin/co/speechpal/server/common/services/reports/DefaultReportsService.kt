@@ -16,6 +16,9 @@ class DefaultReportsService(
     override suspend fun findById(id: String): Either<DomainError, Report?> =
         reportsRepository.findById(id).right()
 
-    override suspend fun insertReport(id: String, textCheckResult: TextCheckResult): Either<DomainError, Report> =
+    override suspend fun insertReport(
+        id: String,
+        textCheckResult: TextCheckResult,
+    ): Either<DomainError, Report> =
         reportsRepository.save(textCheckResult.toReport(id)).right()
 }

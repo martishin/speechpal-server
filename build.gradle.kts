@@ -4,9 +4,11 @@ import org.jooq.meta.jaxb.Property
 plugins {
     id("org.springframework.boot") version "3.1.1"
     id("io.spring.dependency-management") version "1.1.0"
-    kotlin("jvm") version "1.8.22"
-    kotlin("plugin.spring") version "1.8.22"
+    kotlin("jvm") version "1.9.0"
+    kotlin("plugin.spring") version "1.9.0"
     id("nu.studer.jooq") version "8.2.1"
+    // detekt
+    id("io.gitlab.arturbosch.detekt") version ("1.23.1")
 }
 
 group = "co.speechpal"
@@ -71,6 +73,9 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:${property("testcontainersVersion")}")
     testImplementation("org.testcontainers:junit-jupiter:${property("testcontainersVersion")}")
     testImplementation("org.testcontainers:postgresql:${property("testcontainersVersion")}")
+
+    // detekt
+    detektPlugins("com.wolt.arrow.detekt:rules:0.3.0")
 }
 
 tasks.withType<KotlinCompile> {
@@ -127,6 +132,10 @@ jooq {
             }
         }
     }
+}
+
+detekt {
+    config.setFrom(file("src/main/resources/detekt.yml"))
 }
 
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {

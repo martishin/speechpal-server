@@ -1,8 +1,7 @@
 package co.speechpal.server.common.repositories.dialogs
 
 import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
+import arrow.core.raise.either
 import co.speechpal.server.common.errorhandling.ExceptionHandler
 import co.speechpal.server.common.models.domain.dialogs.Dialog
 import co.speechpal.server.common.models.domain.dialogs.NewDialog
@@ -29,24 +28,22 @@ class DefaultDialogsRepository(
         private val objectMapper = jacksonObjectMapper()
     }
 
-    override suspend fun findById(dialogId: Int): Either<DomainError, Dialog?> {
-        return try {
+    override suspend fun findById(dialogId: Int): Either<DomainError, Dialog?> = either {
+        try {
             val sql = dslContext.selectFrom(DIALOGS)
                 .where(DIALOGS.ID.eq(dialogId))
 
             val foundRecord = sql
                 .awaitFirstOrNull()
 
-            foundRecord?.toDialog().right()
+            foundRecord?.toDialog()
         } catch (e: Exception) {
-            exceptionHandler
-                .handleDbException(e, "Error when fetching dialog from db")
-                .left()
+            raise(exceptionHandler.handleDbException(e, "Error when fetching dialog from db"))
         }
     }
 
-    override suspend fun create(newDialog: NewDialog): Either<DomainError, Dialog> {
-        return try {
+    override suspend fun create(newDialog: NewDialog): Either<DomainError, Dialog> = either {
+        try {
             dslContext.transactionCoroutine {
                 val trxDSLContext = it.dsl()
                 val sql = trxDSLContext
@@ -70,17 +67,15 @@ class DefaultDialogsRepository(
                     .where(USERS.ID.eq(newDialog.userId))
                     .awaitFirst()
 
-                createdRecord.toDialog().right()
+                createdRecord.toDialog()
             }
         } catch (e: Exception) {
-            exceptionHandler
-                .handleDbException(e, "Error when creating dialog in db")
-                .left()
+            raise(exceptionHandler.handleDbException(e, "Error when creating dialog in db"))
         }
     }
 
-    override suspend fun save(dialog: Dialog): Either<DomainError, Dialog> {
-        return try {
+    override suspend fun save(dialog: Dialog): Either<DomainError, Dialog> = either {
+        try {
             val sql = dslContext
                 .update(DIALOGS)
                 .set(DIALOGS.MODEL, dialog.model)
@@ -91,11 +86,9 @@ class DefaultDialogsRepository(
                 .returning()
                 .awaitFirst()
 
-            updatedRecord.toDialog().right()
+            updatedRecord.toDialog()
         } catch (e: Exception) {
-            exceptionHandler
-                .handleDbException(e, "Error when saving dialog in db")
-                .left()
+            raise(exceptionHandler.handleDbException(e, "Error when saving dialog in db"))
         }
     }
 

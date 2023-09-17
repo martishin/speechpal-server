@@ -2,7 +2,7 @@ package co.speechpal.server.bot.services.grammar
 
 import arrow.core.Either
 import arrow.core.left
-import arrow.core.right
+import arrow.core.raise.either
 import co.speechpal.server.bot.gateways.openai.OpenAIGateway
 import co.speechpal.server.bot.models.domain.Context
 import co.speechpal.server.bot.models.errors.BotError
@@ -16,7 +16,7 @@ import java.util.regex.Pattern
 
 @Service
 class DefaultGrammarCheckerService(private val openAIClient: OpenAIGateway) : GrammarCheckerService {
-    override suspend fun checkGrammar(context: Context, text: String): Either<BotError, TextCheckResult> {
+    override suspend fun checkGrammar(context: Context, text: String): Either<BotError, TextCheckResult> = either {
         val sentences = Pattern.compile("(?<=[.!?])\\s+").split(text)
 
         val checks = coroutineScope {
@@ -33,9 +33,9 @@ class DefaultGrammarCheckerService(private val openAIClient: OpenAIGateway) : Gr
             )
         }
 
-        return TextCheckResult(
+        TextCheckResult(
             report = report,
             hasErrors = report.any { it.edit != null },
-        ).right()
+        )
     }
 }

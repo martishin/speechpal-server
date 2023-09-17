@@ -35,7 +35,6 @@ After you've provided the audio or video to the bot, it will process the content
         update: Update,
         message: Message,
         args: List<String>,
-    ): Either<BotError, BotResponse> {
-        return BotResponse(START_TEXT).right()
-    }
+    ): Either<BotError, BotResponse> =
+        BotResponse(START_TEXT).right()
 }

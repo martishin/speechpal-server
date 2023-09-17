@@ -1,8 +1,7 @@
 package co.speechpal.server.common.repositories.users
 
 import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
+import arrow.core.raise.either
 import co.speechpal.server.common.errorhandling.ExceptionHandler
 import co.speechpal.server.common.models.domain.users.NewUser
 import co.speechpal.server.common.models.domain.users.User
@@ -20,24 +19,22 @@ class DefaultUsersRepository(
     private val dslContext: DSLContext,
     private val exceptionHandler: ExceptionHandler,
 ) : UsersRepository {
-    override suspend fun findByTelegramUserId(telegramUserId: Long): Either<DomainError, User?> {
-        return try {
+    override suspend fun findByTelegramUserId(telegramUserId: Long): Either<DomainError, User?> = either {
+        try {
             val sql = dslContext.selectFrom(USERS)
                 .where(USERS.TELEGRAM_USER_ID.eq(telegramUserId))
 
             val foundRecord = sql
                 .awaitFirstOrNull()
 
-            foundRecord?.toUser().right()
+            foundRecord?.toUser()
         } catch (e: Exception) {
-            exceptionHandler
-                .handleDbException(e, "Error when fetching user from db")
-                .left()
+            raise(exceptionHandler.handleDbException(e, "Error when fetching user from db"))
         }
     }
 
-    override suspend fun create(newUser: NewUser): Either<DomainError, User> {
-        return try {
+    override suspend fun create(newUser: NewUser): Either<DomainError, User> = either {
+        try {
             val sql = dslContext
                 .insertInto(USERS)
                 .columns(
@@ -59,16 +56,14 @@ class DefaultUsersRepository(
                 .returning()
                 .awaitFirst()
 
-            createdRecord.toUser().right()
+            createdRecord.toUser()
         } catch (e: Exception) {
-            exceptionHandler
-                .handleDbException(e, "Error when creating user in db")
-                .left()
+            raise(exceptionHandler.handleDbException(e, "Error when creating user in db"))
         }
     }
 
-    override suspend fun save(user: User): Either<DomainError, User> {
-        return try {
+    override suspend fun save(user: User): Either<DomainError, User> = either {
+        try {
             val sql = dslContext
                 .update(USERS)
                 .set(USERS.CURRENT_DIALOG_ID, user.currentDialogId)
@@ -78,11 +73,9 @@ class DefaultUsersRepository(
                 .returning()
                 .awaitFirst()
 
-            updatedRecord.toUser().right()
+            updatedRecord.toUser()
         } catch (e: Exception) {
-            exceptionHandler
-                .handleDbException(e, "Error when saving user in db")
-                .left()
+            raise(exceptionHandler.handleDbException(e, "Error when saving user in db"))
         }
     }
 

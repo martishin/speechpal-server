@@ -1,0 +1,3 @@
+ArrowRuleSet:
+    NoEffectScopeBindableValueAsStatement:
+        active: true

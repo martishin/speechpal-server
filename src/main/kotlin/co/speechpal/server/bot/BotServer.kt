@@ -1,9 +1,7 @@
 package co.speechpal.server.bot
 
 import arrow.core.Either
-import arrow.core.flatMap
-import arrow.core.left
-import arrow.core.right
+import arrow.core.raise.either
 import co.speechpal.server.bot.configuration.BotProperties
 import co.speechpal.server.bot.errorhandling.ErrorHandler
 import co.speechpal.server.bot.handlers.Operation
@@ -115,59 +113,66 @@ class BotServer(
         bot.startPolling()
     }
 
-    private suspend fun handleCommand(command: String, env: CommandHandlerEnvironment): Either<BotError, BotResponse> {
-        return createUserIfNotExists(env.message).flatMap {
-            commandHandlers[command]?.handle(env) ?: run {
-                val error = "No handler found for the command '$command'"
-                log.error(error)
-                return BotError.HandlerNotFound(error).left()
-            }
+    private suspend fun handleCommand(
+        command: String,
+        env: CommandHandlerEnvironment,
+    ): Either<BotError, BotResponse> = either {
+        createUserIfNotExists(env.message).bind()
+
+        val handler = commandHandlers[command] ?: run {
+            val error = "No handler found for the command '$command'"
+            log.error(error)
+            raise(BotError.HandlerNotFound(error))
         }
+
+        handler.handle(env).bind()
     }
 
     private suspend fun <Media> handleMedia(
         command: String,
         env: MediaHandlerEnvironment<Media>,
-    ): Either<BotError, BotResponse> {
-        return createUserIfNotExists(env.message).flatMap {
-            (mediaHandlers[command] as? AbstractMediaHandler<Media>?)?.handle(env) ?: run {
-                val error = "No handler found for the command '$command'"
-                log.error(error)
-                return BotError.HandlerNotFound(error).left()
-            }
+    ): Either<BotError, BotResponse> = either {
+        createUserIfNotExists(env.message).bind()
+
+        val handler = mediaHandlers[command] ?: run {
+            val error = "No handler found for the command '$command'"
+            log.error(error)
+            raise(BotError.HandlerNotFound(error))
         }
+
+        (handler as AbstractMediaHandler<Media>).handle(env).bind()
     }
 
     private suspend fun handleText(
         env: TextHandlerEnvironment,
-    ): Either<BotError, BotResponse> {
-        return createUserIfNotExists(env.message).flatMap {
-            textHandler.handle(env)
-        }
+    ): Either<BotError, BotResponse> = either {
+        createUserIfNotExists(env.message).bind()
+
+        textHandler.handle(env).bind()
     }
 
-    private suspend fun createUserIfNotExists(message: Message): Either<BotError, Boolean> {
+    private suspend fun createUserIfNotExists(message: Message): Either<BotError, Boolean> = either {
         val telegramUser =
-            message.from ?: return BotError.CannotReadUserData().left()
+            message.from ?: raise(BotError.CannotReadUserData())
 
-        return usersService.findByTelegramUserId(telegramUser.id).flatMap { user ->
-            if (user == null) {
-                usersService.create(
-                    NewUser(
-                        telegramUserId = telegramUser.id,
-                        chatId = message.chat.id,
-                        username = telegramUser.username,
-                        firstName = telegramUser.firstName,
-                        lastName = telegramUser.lastName,
-                    ),
-                ).map {
-                    true
-                }
-            } else {
-                false.right()
-            }
-        }.mapLeft { error ->
-            errorHandler.handleGenericError(error)
+        val presentUser = usersService.findByTelegramUserId(telegramUser.id).bind()
+
+        if (presentUser == null) {
+            usersService.create(
+                NewUser(
+                    telegramUserId = telegramUser.id,
+                    chatId = message.chat.id,
+                    username = telegramUser.username,
+                    firstName = telegramUser.firstName,
+                    lastName = telegramUser.lastName,
+                ),
+            ).bind()
+
+            true
+        } else {
+            false
         }
+    }.mapLeft { error ->
+        errorHandler.handleGenericError(error)
     }
 }

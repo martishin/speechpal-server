@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class DefaultDialogResponseService(private val openAIClient: OpenAIGateway) : DialogResponseService {
-    override suspend fun getDialogResponse(dialog: List<String>): Either<BotError, String> {
-        return openAIClient.getChatCompletion(dialog)
-    }
+    override suspend fun getDialogResponse(dialog: List<String>): Either<BotError, String> =
+        openAIClient.getChatCompletion(dialog)
 }

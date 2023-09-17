@@ -1,9 +1,8 @@
 package co.speechpal.server.bot.handlers.commands
 
 import arrow.core.Either
-import arrow.core.flatMap
 import arrow.core.left
-import arrow.core.right
+import arrow.core.raise.either
 import co.speechpal.server.bot.errorhandling.ErrorHandler
 import co.speechpal.server.bot.handlers.Operation
 import co.speechpal.server.bot.handlers.commands.base.AbstractCommandHandler
@@ -25,20 +24,16 @@ class StopDialogHandler(
         update: Update,
         message: Message,
         args: List<String>,
-    ): Either<BotError, BotResponse> {
+    ): Either<BotError, BotResponse> = either {
         val telegramUserId = message.from?.id ?: return BotError.CannotReadUserData().left()
 
-        return usersService.findByTelegramUserId(telegramUserId).flatMap { user ->
-            if (user == null) {
-                BotError.UserNotFound().left()
-            } else {
-                val updatedUser = user.copy(currentDialogId = null)
-                usersService.save(updatedUser).flatMap {
-                    BotResponse("Stopped the dialog").right()
-                }
-            }
-        }.mapLeft { error ->
-            errorHandler.handleGenericError(error)
-        }
+        val user = usersService.findByTelegramUserId(telegramUserId).bind() ?: raise(BotError.UserNotFound())
+
+        val updatedUser = user.copy(currentDialogId = null)
+        usersService.save(updatedUser).bind()
+
+        BotResponse("Stopped the dialog")
+    }.mapLeft { error ->
+        errorHandler.handleGenericError(error)
     }
 }

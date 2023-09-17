@@ -1,9 +1,8 @@
 package co.speechpal.server.bot.handlers.text
 
 import arrow.core.Either
-import arrow.core.flatMap
 import arrow.core.left
-import arrow.core.right
+import arrow.core.raise.either
 import co.speechpal.server.bot.errorhandling.ErrorHandler
 import co.speechpal.server.bot.handlers.Operation
 import co.speechpal.server.bot.handlers.text.base.AbstractTextHandler
@@ -29,27 +28,24 @@ class TextHandler(
         update: Update,
         message: Message,
         text: String,
-    ): Either<BotError, BotResponse> {
+    ): Either<BotError, BotResponse> = either {
         val telegramUserId = message.from?.id ?: return BotError.CannotReadUserData().left()
 
-        return usersService.findByTelegramUserId(telegramUserId).flatMap { user ->
-            when {
-                user == null -> BotError.UserNotFound().left()
-                user.currentDialogId == null || user.currentDialogId == 0 -> BotError.DialogWasNotStarted().left()
-                else -> dialogsService.findById(user.currentDialogId).flatMap { dialog ->
-                    if (dialog == null) {
-                        BotError.DialogNotFound().left()
-                    } else {
-                        dialogResponseService.getDialogResponse(dialog.messages + text).flatMap { response ->
-                            dialogsService.save(dialog.copy(messages = dialog.messages + text + response)).flatMap {
-                                BotResponse(response).right()
-                            }
-                        }
-                    }
-                }
-            }
-        }.mapLeft { error ->
-            errorHandler.handleGenericError(error)
+        val user = usersService.findByTelegramUserId(telegramUserId).bind() ?: raise(BotError.UserNotFound())
+
+        if (user.currentDialogId == null || user.currentDialogId == 0) {
+            raise(BotError.DialogWasNotStarted())
         }
+
+        val dialog = dialogsService.findById(user.currentDialogId).bind() ?: raise(BotError.DialogNotFound())
+
+        val response = dialogResponseService.getDialogResponse(dialog.messages + text).bind()
+        val updatedDialog = dialog.copy(messages = dialog.messages + text + response)
+
+        dialogsService.save(updatedDialog).bind()
+
+        BotResponse(response)
+    }.mapLeft { error ->
+        errorHandler.handleGenericError(error)
     }
 }

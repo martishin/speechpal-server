@@ -1,9 +1,8 @@
 package co.speechpal.server.bot.handlers.commands
 
 import arrow.core.Either
-import arrow.core.flatMap
 import arrow.core.left
-import arrow.core.right
+import arrow.core.raise.either
 import co.speechpal.server.bot.errorhandling.ErrorHandler
 import co.speechpal.server.bot.handlers.Operation
 import co.speechpal.server.bot.handlers.commands.base.AbstractCommandHandler
@@ -28,19 +27,19 @@ class StartDialogHandler(
         update: Update,
         message: Message,
         args: List<String>,
-    ): Either<BotError, BotResponse> {
+    ): Either<BotError, BotResponse> = either {
         val telegramUserId = message.from?.id ?: return BotError.CannotReadUserData().left()
 
-        return usersService.findByTelegramUserId(telegramUserId).flatMap { user ->
-            when {
-                user == null -> BotError.UserNotFound().left()
-                user.currentDialogId != null && user.currentDialogId != 0 -> BotError.DialogAlreadyStarted().left()
-                else -> dialogsService.create(NewDialog("gpt-3.5-turbo", user.id)).flatMap {
-                    BotResponse("Started a new dialog").right()
-                }
-            }
-        }.mapLeft { error ->
-            errorHandler.handleGenericError(error)
+        val user = usersService.findByTelegramUserId(telegramUserId).bind() ?: raise(BotError.UserNotFound())
+
+        if (user.currentDialogId != null && user.currentDialogId != 0) {
+            raise(BotError.DialogAlreadyStarted())
         }
+
+        dialogsService.create(NewDialog("gpt-3.5-turbo", user.id)).bind()
+
+        BotResponse("Started a new dialog")
+    }.mapLeft { error ->
+        errorHandler.handleGenericError(error)
     }
 }

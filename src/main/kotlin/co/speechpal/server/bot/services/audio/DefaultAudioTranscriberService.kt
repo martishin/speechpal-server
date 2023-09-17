@@ -1,8 +1,7 @@
 package co.speechpal.server.bot.services.audio
 
 import arrow.core.Either
-import arrow.core.flatMap
-import arrow.core.right
+import arrow.core.raise.either
 import co.speechpal.server.bot.gateways.openai.OpenAIGateway
 import co.speechpal.server.bot.models.domain.Context
 import co.speechpal.server.bot.models.errors.BotError
@@ -15,9 +14,11 @@ import java.io.File
 class DefaultAudioTranscriberService(
     private val openAIClient: OpenAIGateway,
 ) : AudioTranscriberService {
-    override suspend fun transcribe(context: Context, audioFile: File): Either<BotError, String> {
-        return openAIClient.transcribe(audioFile).flatMap { transcription ->
-            transcription.text.right()
-        }
+    override suspend fun transcribe(
+        context: Context,
+        audioFile: File,
+    ): Either<BotError, String> = either {
+        val transcription = openAIClient.transcribe(audioFile).bind()
+        transcription.text
     }
 }

@@ -1,8 +1,7 @@
 package co.speechpal.server.bot.handlers.media
 
 import arrow.core.Either
-import arrow.core.flatMap
-import arrow.core.right
+import arrow.core.raise.either
 import co.speechpal.server.bot.errorhandling.ErrorHandler
 import co.speechpal.server.bot.handlers.Operation
 import co.speechpal.server.bot.handlers.media.base.AbstractMediaHandler
@@ -37,38 +36,35 @@ class VoiceHandler(
         update: Update,
         message: Message,
         media: Voice,
-    ): Either<BotError, BotResponse> {
+    ): Either<BotError, BotResponse> = either {
         val context = Context(media.fileUniqueId)
 
-        return telegramFileService.downloadFileById(context, bot, media.fileId).flatMap {
-            val (fileUniqueId, file) = it
+        val (fileUniqueId, file) = telegramFileService.downloadFileById(context, bot, media.fileId).bind()
 
-            val dirPath = Paths.get("tmp/$fileUniqueId")
-            Files.createDirectories(dirPath)
+        val dirPath = Paths.get("tmp/$fileUniqueId")
+        Files.createDirectories(dirPath)
 
-            val telegramAudioFile = File("tmp/$fileUniqueId/telegram_audio.ogg")
-            val audioFile = File("tmp/$fileUniqueId/audio.m4a")
+        val telegramAudioFile = File("tmp/$fileUniqueId/telegram_audio.ogg")
+        val audioFile = File("tmp/$fileUniqueId/audio.m4a")
 
-            telegramAudioFile.writeBytes(file)
+        telegramAudioFile.writeBytes(file)
 
-            audioConverterService.convert(context, telegramAudioFile, audioFile).flatMap {
-                audioTranscriberService.transcribe(context, audioFile).flatMap { text ->
-                    grammarCheckerService.checkGrammar(context, text).flatMap { textCheckResult ->
-                        reportsService.insertReport(context.requestId, textCheckResult).flatMap {
-                            Files.walk(dirPath)
-                                .sorted(Comparator.reverseOrder()) // This is important, so we delete child files/directories first
-                                .forEach(Files::delete)
+        audioConverterService.convert(context, telegramAudioFile, audioFile).bind()
 
-                            BotResponse(
-                                "You can check your results here: \n" +
-                                    "https://speechpal.co/reports/${context.requestId}",
-                            ).right()
-                        }
-                    }
-                }
-            }
-        }.mapLeft { error ->
-            errorHandler.handleGenericError(error)
-        }
+        val text = audioTranscriberService.transcribe(context, audioFile).bind()
+        val textCheckResult = grammarCheckerService.checkGrammar(context, text).bind()
+
+        reportsService.insertReport(context.requestId, textCheckResult).bind()
+
+        Files.walk(dirPath)
+            .sorted(Comparator.reverseOrder()) // This is important, so we delete child files/directories first
+            .forEach(Files::delete)
+
+        BotResponse(
+            "You can check your results here: \n" +
+                "https://speechpal.co/reports/${context.requestId}",
+        )
+    }.mapLeft { error ->
+        errorHandler.handleGenericError(error)
     }
 }
