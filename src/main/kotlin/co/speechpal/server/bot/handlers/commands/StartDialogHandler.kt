@@ -22,6 +22,10 @@ class StartDialogHandler(
     private val dialogsService: DialogsService,
     errorHandler: ErrorHandler,
 ) : AbstractCommandHandler(errorHandler) {
+    private companion object {
+        const val FIRST_MESSAGE = "Hi, nice to see you!\nWhat topic do you want to discuss today?"
+    }
+
     override suspend fun handle(
         bot: Bot,
         update: Update,
@@ -36,9 +40,9 @@ class StartDialogHandler(
             raise(BotError.DialogAlreadyStarted())
         }
 
-        dialogsService.create(NewDialog("gpt-3.5-turbo", user.id)).bind()
+        dialogsService.create(NewDialog("gpt-3.5-turbo", user.id, listOf(FIRST_MESSAGE))).bind()
 
-        BotResponse("Started a new dialog")
+        BotResponse(FIRST_MESSAGE)
     }.mapLeft { error ->
         errorHandler.handleGenericError(error)
     }

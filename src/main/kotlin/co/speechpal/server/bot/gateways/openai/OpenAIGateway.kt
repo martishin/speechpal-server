@@ -1,6 +1,7 @@
 package co.speechpal.server.bot.gateways.openai
 
 import arrow.core.Either
+import co.speechpal.server.bot.models.domain.ChatMessage
 import co.speechpal.server.bot.models.errors.BotError
 import co.speechpal.server.common.models.domain.reports.SentenceCheckResult
 import com.aallam.openai.api.BetaOpenAI
@@ -11,5 +12,5 @@ import java.io.File
 interface OpenAIGateway {
     suspend fun transcribe(audioFile: File): Either<BotError, Transcription>
     suspend fun checkGrammar(sentence: String): Either<BotError, SentenceCheckResult>
-    suspend fun getChatCompletion(dialog: List<String>): Either<BotError, String>
+    suspend fun getChatCompletion(chat: List<ChatMessage>): Either<BotError, String>
 }

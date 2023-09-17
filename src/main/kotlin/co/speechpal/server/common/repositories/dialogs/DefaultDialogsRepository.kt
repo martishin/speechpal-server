@@ -51,10 +51,12 @@ class DefaultDialogsRepository(
                     .columns(
                         DIALOGS.MODEL,
                         DIALOGS.USER_ID,
+                        DIALOGS.MESSAGES,
                     )
                     .values(
                         newDialog.model,
                         newDialog.userId,
+                        newDialog.messages.toMessagesJson(),
                     )
 
                 val createdRecord = sql
@@ -79,7 +81,7 @@ class DefaultDialogsRepository(
             val sql = dslContext
                 .update(DIALOGS)
                 .set(DIALOGS.MODEL, dialog.model)
-                .set(DIALOGS.MESSAGES, JSON.valueOf(objectMapper.writeValueAsString(dialog.messages)))
+                .set(DIALOGS.MESSAGES, dialog.messages.toMessagesJson())
                 .where(DIALOGS.ID.eq(dialog.id))
 
             val updatedRecord = sql
@@ -102,4 +104,7 @@ class DefaultDialogsRepository(
             this.get("user_id", Int::class.java),
         )
     }
+
+    private fun List<String>.toMessagesJson() =
+        JSON.valueOf(objectMapper.writeValueAsString(this))
 }

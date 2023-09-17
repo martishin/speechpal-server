@@ -19,6 +19,10 @@ class StopDialogHandler(
     private val usersService: UsersService,
     errorHandler: ErrorHandler,
 ) : AbstractCommandHandler(errorHandler) {
+    private companion object {
+        const val LAST_MESSAGE = "Bye, see you around!"
+    }
+
     override suspend fun handle(
         bot: Bot,
         update: Update,
@@ -32,7 +36,7 @@ class StopDialogHandler(
         val updatedUser = user.copy(currentDialogId = null)
         usersService.save(updatedUser).bind()
 
-        BotResponse("Stopped the dialog")
+        BotResponse(LAST_MESSAGE)
     }.mapLeft { error ->
         errorHandler.handleGenericError(error)
     }
