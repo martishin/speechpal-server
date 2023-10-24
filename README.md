@@ -1,6 +1,6 @@
 # SpeechPal Server repository
 
-[![SpeechPal Logo](path_to_logo_if_available)](https://www.speechpal.co/)
+<a href="https://www.speechpal.co/"><img src="./speechpal-logo.png" width="250"/></a>
 
 This repository hosts the backend code for the [speechpal.co](https://www.speechpal.co/) service, responsible the telegram bot and report functionalities.
 
