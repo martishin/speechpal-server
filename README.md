@@ -34,16 +34,16 @@ This repository hosts the backend code for the [SpeechPal](https://www.speechpal
   `./gradlew bootRun`
 
 ## Technologies used
-- Kotlin with coroutines
-- Spring WebFlux
-- PostgreSQL
-- MongoDB
-- Spring Data R2DBC
-- Arrow-KT
-- Flyway
-- Jooq
-- Testcontainers
-- Telegram API client
-- OpenAI API client
-- Docker
-- Detekt
+- [Kotlin](https://kotlinlang.org/) with [coroutines](https://kotlinlang.org/docs/coroutines-overview.html)
+- [Spring WebFlux](https://docs.spring.io/spring-framework/reference/web/webflux.html)
+- [PostgreSQL](https://www.postgresql.org/)
+- [MongoDB](https://www.mongodb.com/)
+- [Spring Data R2DBC](https://spring.io/projects/spring-data-r2dbc)
+- [Arrow-KT](https://arrow-kt.io/)
+- [Flyway](https://flywaydb.org/)
+- [Jooq](https://www.jooq.org/)
+- [Testcontainers](https://testcontainers.com/)
+- [Telegram API client](https://github.com/kotlin-telegram-bot/kotlin-telegram-bot)
+- [OpenAI API client](https://github.com/aallam/openai-kotlin)
+- [Docker](https://www.docker.com/)
+- [Detekt](https://detekt.dev/)
