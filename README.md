@@ -32,3 +32,18 @@ This repository hosts the backend code for the [SpeechPal](https://www.speechpal
    `source .env`
 3. To start the server, run:
   `./gradlew bootRun`
+
+## Technologies used
+- Kotlin with coroutines
+- Spring WebFlux
+- PostgreSQL
+- MongoDB
+- Spring Data R2DBC
+- Arrow-KT
+- Flyway
+- Jooq
+- Testcontainers
+- Telegram API client
+- OpenAI API client
+- Docker
+- Detekt
