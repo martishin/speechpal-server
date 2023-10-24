@@ -1,4 +1,4 @@
-# SpeechPal Server repository
+# SpeechPal Server
 
 <a href="https://www.speechpal.co/"><img src="./speechpal-logo.png" width="250"/></a>
 
