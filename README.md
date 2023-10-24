@@ -33,7 +33,7 @@ This repository hosts the backend code for the [SpeechPal](https://www.speechpal
 3. To start the server, run:
   `./gradlew bootRun`
 
-## Technologies used
+## ⚙️ Technologies used
 - [Kotlin](https://kotlinlang.org/) with [coroutines](https://kotlinlang.org/docs/coroutines-overview.html)
 - [Spring WebFlux](https://docs.spring.io/spring-framework/reference/web/webflux.html)
 - [PostgreSQL](https://www.postgresql.org/)
