@@ -35,6 +35,7 @@ This repository hosts the backend code for the [SpeechPal](https://www.speechpal
 
 ## ⚙️ Technologies used
 - [Kotlin](https://kotlinlang.org/) with [coroutines](https://kotlinlang.org/docs/coroutines-overview.html)
+- [Gradle](https://gradle.org/)
 - [Spring WebFlux](https://docs.spring.io/spring-framework/reference/web/webflux.html)
 - [PostgreSQL](https://www.postgresql.org/)
 - [MongoDB](https://www.mongodb.com/)
