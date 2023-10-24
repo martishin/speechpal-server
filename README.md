@@ -2,7 +2,7 @@
 
 <a href="https://www.speechpal.co/"><img src="./speechpal-logo.png" width="250"/></a>
 
-This repository hosts the backend code for the [speechpal.co](https://www.speechpal.co/) service, responsible the telegram bot and report functionalities.
+This repository hosts the backend code for the [SpeechPal](https://www.speechpal.co/) service, responsible the telegram bot and report functionalities.
 
 ## 📌 Features
 - **Telegram Bot**: Interact with the SpeechPal service directly through Telegram. Check the bot [here](https://t.me/SpeechPalBot).
